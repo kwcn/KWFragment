@@ -42,7 +42,7 @@ public abstract class BaseFragment extends Fragment {
     @Override
     public void onSaveInstanceState(Bundle outState) {
         if (mLifeCycleLogEnabled) {
-            iLog.d(true, mBaseTag, this + " onSaveInstanceState outState : " + outState);
+            iLog.d(mBaseTag, this + " onSaveInstanceState outState : " + outState);
         }
         mLifeCycleCallbacksManager.onFragmentSaveInstanceState(this, outState);
         super.onSaveInstanceState(outState);
@@ -52,7 +52,7 @@ public abstract class BaseFragment extends Fragment {
     public void onAttach(Context context) {
         super.onAttach(context);
         if (mLifeCycleLogEnabled) {
-            iLog.d(true, mBaseTag, this + " onAttach() - context: " + (context != null));
+            iLog.d(mBaseTag, this + " onAttach() - context: " + (context != null));
         }
         mLifeCycleCallbacksManager.reset();
     }
@@ -62,7 +62,7 @@ public abstract class BaseFragment extends Fragment {
         super.onCreate(savedInstanceState);
         Activity a = getActivity();
         if (mLifeCycleLogEnabled) {
-            iLog.d(true, mBaseTag,
+            iLog.d(mBaseTag,
                     this + " onCreate() - savedInstanceState: " + (savedInstanceState != null));
         }
         mLifeCycleCallbacksManager.onFragmentCreated(this, savedInstanceState);
@@ -81,7 +81,7 @@ public abstract class BaseFragment extends Fragment {
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         if (mLifeCycleLogEnabled) {
-            iLog.d(true, mBaseTag, this + " onViewCreated view " + view + " savedInstanceState " +
+            iLog.d(mBaseTag, this + " onViewCreated view " + view + " savedInstanceState " +
                     savedInstanceState);
         }
         mLifeCycleCallbacksManager.onFragmentViewCreated(this, view, savedInstanceState);
@@ -91,7 +91,7 @@ public abstract class BaseFragment extends Fragment {
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         if (mLifeCycleLogEnabled) {
-            iLog.d(true, mBaseTag,
+            iLog.d(mBaseTag,
                     this + " onActivityCreated() - savedInstanceState: " + savedInstanceState);
         }
         mLifeCycleCallbacksManager.onFragmentActivityCreated(this, savedInstanceState);
@@ -101,7 +101,7 @@ public abstract class BaseFragment extends Fragment {
     public void onStart() {
         super.onStart();
         if (mLifeCycleLogEnabled) {
-            iLog.d(true, mBaseTag, this + " onStart()");
+            iLog.d(mBaseTag, this + " onStart()");
         }
         mLifeCycleCallbacksManager.onFragmentStarted(this);
     }
@@ -110,7 +110,7 @@ public abstract class BaseFragment extends Fragment {
     public void onResume() {
         super.onResume();
         if (mLifeCycleLogEnabled) {
-            iLog.d(true, mBaseTag, this + " onResume()");
+            iLog.d(mBaseTag, this + " onResume()");
         }
         mLifeCycleCallbacksManager.onFragmentResumed(this);
     }
@@ -118,7 +118,7 @@ public abstract class BaseFragment extends Fragment {
     @Override
     public void onPause() {
         if (mLifeCycleLogEnabled) {
-            iLog.d(true, mBaseTag, this + " onPause()");
+            iLog.d(mBaseTag, this + " onPause()");
         }
         mLifeCycleCallbacksManager.onFragmentPaused(this);
         super.onPause();
@@ -127,7 +127,7 @@ public abstract class BaseFragment extends Fragment {
     @Override
     public void onStop() {
         if (mLifeCycleLogEnabled) {
-            iLog.d(true, mBaseTag, this + " onStop()");
+            iLog.d(mBaseTag, this + " onStop()");
         }
         mLifeCycleCallbacksManager.onFragmentStopped(this);
         super.onStop();
@@ -136,7 +136,7 @@ public abstract class BaseFragment extends Fragment {
     @Override
     public void onDestroyView() {
         if (mLifeCycleLogEnabled) {
-            iLog.d(true, mBaseTag, this + " onDestroyView()");
+            iLog.d(mBaseTag, this + " onDestroyView()");
         }
         mLifeCycleCallbacksManager.onFragmentViewDestroyed(this);
         super.onDestroyView();
@@ -145,7 +145,7 @@ public abstract class BaseFragment extends Fragment {
     @Override
     public void onHiddenChanged(boolean hidden) {
         if (mLifeCycleLogEnabled) {
-            iLog.d(true, mBaseTag, this + " onHiddenChanged() " + hidden);
+            iLog.d(mBaseTag, this + " onHiddenChanged() " + hidden);
         }
         super.onHiddenChanged(hidden);
     }
@@ -153,7 +153,7 @@ public abstract class BaseFragment extends Fragment {
     @Override
     public void onDestroy() {
         if (mLifeCycleLogEnabled) {
-            iLog.d(true, mBaseTag, this + " onDestroy()");
+            iLog.d(mBaseTag, this + " onDestroy()");
         }
         mLifeCycleCallbacksManager.onFragmentDestroyed(this);
         super.onDestroy();
@@ -162,7 +162,7 @@ public abstract class BaseFragment extends Fragment {
     @Override
     public void onDetach() {
         if (mLifeCycleLogEnabled) {
-            iLog.d(true, mBaseTag, this + " onDetach()");
+            iLog.d(mBaseTag, this + " onDetach()");
         }
         super.onDetach();
     }
@@ -239,7 +239,7 @@ public abstract class BaseFragment extends Fragment {
     @Override
     public void setUserVisibleHint(boolean isVisibleToUser) {
         if (mLifeCycleLogEnabled) {
-            iLog.d(true, mBaseTag,
+            iLog.d(mBaseTag,
                     this + " setUserVisibleHint isVisibleToUser : " + isVisibleToUser);
         }
         mLifeCycleCallbacksManager.setFragmentUserVisibleHint(this, isVisibleToUser);

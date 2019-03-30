@@ -23,6 +23,8 @@ public class iLog {
 
     public static final String PREFIX_TAG = "KW-";
 
+    private static boolean mEnableLog;
+
     public static void setAppVersion(String version) {
         sAppVersionInfo = " | app ver: " + version;
     }
@@ -31,78 +33,72 @@ public class iLog {
         d("KWDY", log);
     }
 
-    // Verbose.
-    public static void v(String tag, String msg) {
-        Log.v(PREFIX_TAG + tag, msg + sAppVersionInfo);
+    public static void setEnableLog(boolean enableLog) {
+        mEnableLog = enableLog;
     }
 
-    public static void v(boolean enableLog, String tag, String msg) {
-        if (enableLog) {
+    // Verbose.
+    public static void v(String tag, String msg) {
+        if (mEnableLog) {
             Log.v(PREFIX_TAG + tag, msg + sAppVersionInfo);
         }
     }
 
     public static void v(String tag, String msg, Throwable tr) {
-        Log.v(PREFIX_TAG + tag, msg + sAppVersionInfo, tr);
+        if (mEnableLog) {
+            Log.v(PREFIX_TAG + tag, msg + sAppVersionInfo, tr);
+        }
     }
 
     // Debug.
     public static void d(String tag, String msg) {
-        Log.d(PREFIX_TAG + tag, msg + sAppVersionInfo);
-    }
-
-    public static void d(boolean enableLog, String tag, String msg) {
-        if (enableLog) {
+        if (mEnableLog) {
             Log.d(PREFIX_TAG + tag, msg + sAppVersionInfo);
         }
     }
 
     public static void d(String tag, String msg, Throwable tr) {
-        Log.d(PREFIX_TAG + tag, msg + sAppVersionInfo, tr);
+        if (mEnableLog) {
+            Log.d(PREFIX_TAG + tag, msg + sAppVersionInfo, tr);
+        }
     }
 
     // Info.
     public static void i(String tag, String msg) {
-        Log.i(PREFIX_TAG + tag, msg + sAppVersionInfo);
-    }
-
-    public static void i(boolean enableLog, String tag, String msg) {
-        if (enableLog) {
+        if (mEnableLog) {
             Log.i(PREFIX_TAG + tag, msg + sAppVersionInfo);
         }
     }
 
     public static void i(String tag, String msg, Throwable tr) {
-        Log.i(PREFIX_TAG + tag, msg + sAppVersionInfo, tr);
+        if (mEnableLog) {
+            Log.i(PREFIX_TAG + tag, msg + sAppVersionInfo, tr);
+        }
     }
 
     // Warn.
     public static void w(String tag, String msg) {
-        Log.w(PREFIX_TAG + tag, msg + sAppVersionInfo);
-    }
-
-    public static void w(boolean enableLog, String tag, String msg) {
-        if (enableLog) {
+        if (mEnableLog) {
             Log.w(PREFIX_TAG + tag, msg + sAppVersionInfo);
         }
     }
 
     public static void w(String tag, String msg, Throwable tr) {
-        Log.w(PREFIX_TAG + tag, msg + sAppVersionInfo, tr);
+        if (mEnableLog) {
+            Log.w(PREFIX_TAG + tag, msg + sAppVersionInfo, tr);
+        }
     }
 
     // Error.
     public static void e(String tag, String msg) {
-        Log.e(PREFIX_TAG + tag, msg + sAppVersionInfo);
-    }
-
-    public static void e(boolean enableLog, String tag, String msg) {
-        if (enableLog) {
+        if (mEnableLog) {
             Log.e(PREFIX_TAG + tag, msg + sAppVersionInfo);
         }
     }
 
     public static void e(String tag, String msg, Throwable tr) {
-        Log.e(PREFIX_TAG + tag, msg + sAppVersionInfo, tr);
+        if (mEnableLog) {
+            Log.e(PREFIX_TAG + tag, msg + sAppVersionInfo, tr);
+        }
     }
 }
