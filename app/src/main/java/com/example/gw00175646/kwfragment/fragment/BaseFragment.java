@@ -2,6 +2,7 @@ package com.example.gw00175646.kwfragment.fragment;
 
 
 import android.app.Activity;
+import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.CallSuper;
 import android.support.v4.app.Fragment;
@@ -48,10 +49,10 @@ public abstract class BaseFragment extends Fragment {
     }
 
     @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
+    public void onAttach(Context context) {
+        super.onAttach(context);
         if (mLifeCycleLogEnabled) {
-            iLog.d(true, mBaseTag, this + " onAttach() - activity: " + (activity != null));
+            iLog.d(true, mBaseTag, this + " onAttach() - context: " + (context != null));
         }
         mLifeCycleCallbacksManager.reset();
     }
