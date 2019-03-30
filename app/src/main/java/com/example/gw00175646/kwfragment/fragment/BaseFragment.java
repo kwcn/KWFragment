@@ -21,6 +21,9 @@ import com.example.gw00175646.kwfragment.BuildConfig;
 import java.util.HashSet;
 import java.util.Set;
 
+import butterknife.ButterKnife;
+import butterknife.Unbinder;
+
 import static com.example.gw00175646.kwfragment.fragment.DefaultConstants.UNDEFINED;
 
 public abstract class BaseFragment extends Fragment {
@@ -38,6 +41,7 @@ public abstract class BaseFragment extends Fragment {
     private final LifeCycleCallbacksManager mLifeCycleCallbacksManager =
             new LifeCycleCallbacksManager();
 
+    private Unbinder mUnbinder;
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
@@ -68,18 +72,22 @@ public abstract class BaseFragment extends Fragment {
         mLifeCycleCallbacksManager.onFragmentCreated(this, savedInstanceState);
     }
 
+    @CallSuper
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         if (mLifeCycleLogEnabled) {
             Log.d(mBaseTag, this + " onCreateView()");
         }
-        return super.onCreateView(inflater, container, savedInstanceState);
+        return inflater.inflate(getLayoutRes(), container, false);
     }
+
+    protected abstract int getLayoutRes();
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        mUnbinder = ButterKnife.bind(this, view);
         if (mLifeCycleLogEnabled) {
             iLog.d(mBaseTag, this + " onViewCreated view " + view + " savedInstanceState " +
                     savedInstanceState);
@@ -156,6 +164,7 @@ public abstract class BaseFragment extends Fragment {
             iLog.d(mBaseTag, this + " onDestroy()");
         }
         mLifeCycleCallbacksManager.onFragmentDestroyed(this);
+        mUnbinder.unbind();
         super.onDestroy();
     }
 
