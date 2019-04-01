@@ -81,26 +81,13 @@ public abstract class RecyclerViewFragment<T extends RecyclerCursorAdapter> exte
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setHasOptionsMenu(true);
-    }
-
-    @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
         mRecyclerView.setLayoutManager(onCreateLayoutManager());
         mAdapter = onCreateAdapter();
         mRecyclerView.setAdapter(mAdapter);
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && getUserVisibleHint()) {
-            //setMenuVisibility(true);
-        }
+        setListShownImmediate(true);
     }
 
     @NonNull
@@ -114,15 +101,12 @@ public abstract class RecyclerViewFragment<T extends RecyclerCursorAdapter> exte
 
     @Override
     public void onLoadFinished(@NonNull Loader<Cursor> loader, Cursor cursor) {
-        //  mAdapter.swapCursor(cursor);
-        //        if (checkDataValidation() && (dataCount > 0 || !mShownOnlyHavingValidDataOnly)) {
-        //            setListShown(true);
-        //        }
+        mAdapter.swapCursor(cursor);
     }
 
     @Override
     public void onLoaderReset(@NonNull Loader<Cursor> loader) {
-        //  mAdapter.swapCursor(null);
+        mAdapter.swapCursor(null);
     }
 
     protected abstract T onCreateAdapter();
@@ -237,7 +221,7 @@ public abstract class RecyclerViewFragment<T extends RecyclerCursorAdapter> exte
         MatrixCursor cursor = new MatrixCursor(projection);
 
         List<Object> columnValues = new ArrayList<>();
-        // columnValues.add(RecyclerCursorAdapter.convertToId(viewType, position));
+        columnValues.add(RecyclerCursorAdapter.convertToId(viewType, position));
         int len = projection.length;
         for (int i = 1; i < len; i++) {
             columnValues.add(UNDEFINED);
@@ -261,15 +245,20 @@ public abstract class RecyclerViewFragment<T extends RecyclerCursorAdapter> exte
     }
 
     protected final void setListShownImmediate(boolean shown) {
-        mListShown = shown;
-        mProgressContainer.clearAnimation();
-        mListContainer.clearAnimation();
+//        mListShown = shown;
+//        mProgressContainer.clearAnimation();
+//        mListContainer.clearAnimation();
+//        if (shown) {
+//            mProgressContainer.setVisibility(View.GONE);
+//            mListContainer.setVisibility(View.VISIBLE);
+//        } else {
+//            mProgressContainer.setVisibility(View.VISIBLE);
+//            mListContainer.setVisibility(View.GONE);
+//        }
         if (shown) {
             mProgressContainer.setVisibility(View.GONE);
-            mListContainer.setVisibility(View.VISIBLE);
         } else {
             mProgressContainer.setVisibility(View.VISIBLE);
-            mListContainer.setVisibility(View.GONE);
         }
     }
 

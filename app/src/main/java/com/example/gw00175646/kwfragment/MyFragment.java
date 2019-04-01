@@ -8,12 +8,19 @@ import android.support.v4.content.AsyncTaskLoader;
 import android.support.v4.content.Loader;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.View;
 
 import com.example.gw00175646.kwfragment.fragment.ListUtils;
 import com.example.gw00175646.kwfragment.fragment.QueryArgs;
 import com.example.gw00175646.kwfragment.fragment.RecyclerViewFragment;
 
 public class MyFragment extends RecyclerViewFragment<MyAdapter> {
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        initListLoader(1);
+    }
+
     @Override
     protected MyAdapter onCreateAdapter() {
         return new MyAdapter.Builder(this).setText1Col(ListUtils.TestColumn.TEXT1).setText2Col
