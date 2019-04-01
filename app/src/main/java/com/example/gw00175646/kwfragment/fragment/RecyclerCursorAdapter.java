@@ -257,7 +257,7 @@ public abstract class RecyclerCursorAdapter<VH extends RecyclerCursorAdapter.Vie
     protected void onBindViewHolderThumbnailView(VH holder, int position, Cursor c) {
         if (holder.thumbnailView != null && mThumbnailIndex != UNDEFINED) {
             String uri = c.getString(mThumbnailIndex);
-            // need use 3rd plugin load to imageView;
+            // need use 3rd plugin load to imageView and use mThumbnailSizeResId
         }
     }
 
@@ -271,6 +271,18 @@ public abstract class RecyclerCursorAdapter<VH extends RecyclerCursorAdapter.Vie
 
     public boolean isEnabled(int position) {
         return true;
+    }
+
+    public void setOnItemClickListener(OnItemClickListener listener) {
+        mOnItemClickListener = listener;
+    }
+
+    public void setOnItemLongClickListener(OnItemLongClickListener listener) {
+        mOnItemLongClickListener = listener;
+    }
+
+    public void setOnGenericMotionListener(View.OnGenericMotionListener listener) {
+        mOnGenericMotionListener = listener;
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
