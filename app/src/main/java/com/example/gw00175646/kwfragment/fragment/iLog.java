@@ -21,7 +21,7 @@ import android.util.Log;
 public class iLog {
     private static String sAppVersionInfo = " | app ver: unknown";
 
-    public static final String PREFIX_TAG = "KW-";
+    private static final String PREFIX_TAG = "KW-";
 
     private static boolean mEnableLog;
 

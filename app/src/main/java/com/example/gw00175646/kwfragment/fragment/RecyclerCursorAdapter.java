@@ -3,10 +3,9 @@ package com.example.gw00175646.kwfragment.fragment;
 import android.content.Context;
 import android.content.res.Resources;
 import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.support.annotation.ColorRes;
 import android.support.annotation.DimenRes;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.res.ResourcesCompat;
@@ -50,7 +49,7 @@ public abstract class RecyclerCursorAdapter<VH extends RecyclerCursorAdapter.Vie
     private OnItemClickListener mOnItemClickListener;
     private OnItemLongClickListener mOnItemLongClickListener;
     private View.OnGenericMotionListener mOnGenericMotionListener;
-    boolean mDataValid;
+    private boolean mDataValid;
     private Cursor mCursor;
 
     public interface OnItemClickListener {
@@ -63,8 +62,8 @@ public abstract class RecyclerCursorAdapter<VH extends RecyclerCursorAdapter.Vie
 
     public RecyclerCursorAdapter(AbsBuilder<?> builder) {
         mFragment = builder.mFragment;
-        mRecyclerViewableList =
-                mFragment instanceof RecyclerViewableList ? (RecyclerViewableList) mFragment : null;
+        mRecyclerViewableList = mFragment instanceof RecyclerViewableList ?
+                (RecyclerViewableList) mFragment : null;
 
         mContext = builder.mContext;
         mText1Col = builder.mText1Col;
@@ -81,20 +80,20 @@ public abstract class RecyclerCursorAdapter<VH extends RecyclerCursorAdapter.Vie
         setHasStableIds(true);
     }
 
+    @NonNull
     @Override
-    public VH onCreateViewHolder(ViewGroup parent, int viewType) {
+    public VH onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         // need add headView
-        VH holder = onCreateViewHolder(parent, viewType, null);
-        return holder;
+        return onCreateViewHolder(parent, viewType, null);
     }
 
-    protected abstract VH onCreateViewHolder(ViewGroup parent, int viewType,
-                                             @Nullable View itemView);
+    protected abstract VH onCreateViewHolder(ViewGroup parent, int viewType, @Nullable View
+            itemView);
 
     @Override
-    public void onBindViewHolder(VH holder, final int position) {
-        iLog.d(TAG, mFragment + " | " + TAG + " onBindViewHolder() holder: " + holder +
-                " | position: " + position);
+    public void onBindViewHolder(@NonNull VH holder, final int position) {
+        iLog.d(TAG, mFragment + " | " + TAG + " onBindViewHolder() holder: " + holder + " | " +
+                "position: " + position);
         if (getItemViewType(position) < 0) {
             return;
         }
@@ -112,13 +111,12 @@ public abstract class RecyclerCursorAdapter<VH extends RecyclerCursorAdapter.Vie
             throw new IllegalStateException("this should only be called when the cursor is valid");
         }
         if (!mCursor.moveToPosition(position)) {
-            throw new IllegalStateException(
-                    "couldn't move cursor to position " + position + " | cursorCount: " +
-                            (mCursor != null ? mCursor.getCount() : null));
+            throw new IllegalStateException("couldn't move cursor to position " + position + " | " +
+                    "cursorCount: " + (mCursor != null ? mCursor.getCount() : null));
         }
         long id = mCursor.getLong(mRowIDColumn);
-        return mCursor.getLong(mRowIDColumn) > 0 ? DefaultViewType.NORMAL :
-                convertToViewType(id, position);
+        return mCursor.getLong(mRowIDColumn) > 0 ? DefaultViewType.NORMAL : convertToViewType(id,
+                position);
     }
 
     @Override
@@ -152,25 +150,23 @@ public abstract class RecyclerCursorAdapter<VH extends RecyclerCursorAdapter.Vie
     public static int convertToViewType(long id, int position) {
         if (id > DefaultViewType.MIN) {
             // This means viewType is same as id.
-            iLog.d(TAG, "convertToViewType() position: " + position + " | id: " + id +
-                    " return as it is");
+            iLog.d(TAG, "convertToViewType() position: " + position + " | id: " + id + " return " +
+                    "as it is");
             return (int) id;
         }
-        iLog.d(TAG,
-                "convertToViewType() position: " + position + " id: " + id + " -> viewType: " +
-                        ((int) id + position - DefaultViewType.MIN));
+        iLog.d(TAG, "convertToViewType() position: " + position + " id: " + id + " -> viewType: "
+                + ((int) id + position - DefaultViewType.MIN));
         return (int) id + position - DefaultViewType.MIN;
     }
 
     public static long convertToId(int viewType, int position) {
-        iLog.d(TAG, "convertToId() position: " + position + " | viewType: " + viewType +
-                " -> id: " + (viewType - position + DefaultViewType.MIN));
+        iLog.d(TAG, "convertToId() position: " + position + " | viewType: " + viewType + " -> id:" +
+                " " + (viewType - position + DefaultViewType.MIN));
         return viewType - position + DefaultViewType.MIN;
     }
 
     protected void initColIndex(Cursor newCursor) {
-        iLog.d(TAG,
-                mFragment + " | " + TAG + " initColIndex() - newCursor: " + newCursor);
+        iLog.d(TAG, mFragment + " | " + TAG + " initColIndex() - newCursor: " + newCursor);
         if (mText1Col != null) {
             mText1Index = newCursor.getColumnIndexOrThrow(mText1Col);
         }
@@ -186,8 +182,8 @@ public abstract class RecyclerCursorAdapter<VH extends RecyclerCursorAdapter.Vie
     }
 
     public Cursor swapCursor(Cursor newCursor) {
-        iLog.d(TAG, mFragment + " | " + TAG + " swapCursor() | prevCursor: " + mCursor +
-                " | newCursor: " + newCursor);
+        iLog.d(TAG, mFragment + " | " + TAG + " swapCursor() | prevCursor: " + mCursor + " | " +
+                "newCursor: " + newCursor);
         if (newCursor == mCursor) {
             return null;
         }
@@ -225,8 +221,8 @@ public abstract class RecyclerCursorAdapter<VH extends RecyclerCursorAdapter.Vie
     private Cursor getCursorInternal(int position, boolean throwException) {
         if (!mDataValid) {
             if (throwException) {
-                throw new IllegalStateException(
-                        "this should only be called when the cursor is valid");
+                throw new IllegalStateException("this should only be called when the cursor is " +
+                        "valid");
             } else {
                 iLog.w(TAG, mFragment + " data invalid | getCursorInternal()");
                 return null;
@@ -244,16 +240,16 @@ public abstract class RecyclerCursorAdapter<VH extends RecyclerCursorAdapter.Vie
 
     protected void onBindViewHolderTextView(VH holder, int position, Cursor c) {
         if (holder.textView1 != null && mText1Index != UNDEFINED) {
-            holder.textView1
-                    .setText(DefaultUiUtils.transUnknownString(mContext, c.getString(mText1Index)));
+            holder.textView1.setText(DefaultUiUtils.transUnknownString(mContext, c.getString
+                    (mText1Index)));
         }
         if (holder.textView2 != null && mText2Index != UNDEFINED) {
-            holder.textView2
-                    .setText(DefaultUiUtils.transUnknownString(mContext, c.getString(mText2Index)));
+            holder.textView2.setText(DefaultUiUtils.transUnknownString(mContext, c.getString
+                    (mText2Index)));
         }
         if (holder.textView3 != null && mText3Index != UNDEFINED) {
-            holder.textView3
-                    .setText(DefaultUiUtils.transUnknownString(mContext, c.getString(mText3Index)));
+            holder.textView3.setText(DefaultUiUtils.transUnknownString(mContext, c.getString
+                    (mText3Index)));
         }
     }
 
@@ -295,8 +291,8 @@ public abstract class RecyclerCursorAdapter<VH extends RecyclerCursorAdapter.Vie
         public final TextView textView3;
         public final ImageView thumbnailView;
 
-        public ViewHolder(final RecyclerCursorAdapter<?> adapter, final View itemView,
-                          int viewType) {
+        public ViewHolder(final RecyclerCursorAdapter<?> adapter, final View itemView, int
+                viewType) {
             super(itemView);
 
             if (viewType > 0 && adapter.mOnItemClickListener != null) {
@@ -311,24 +307,24 @@ public abstract class RecyclerCursorAdapter<VH extends RecyclerCursorAdapter.Vie
 
             textView1 = itemView.findViewById(R.id.text1);
             if (textView1 != null) {
-                textView1.setTextColor(
-                        ResourcesCompat.getColor(res, adapter.mText1ColorResId, null));
+                textView1.setTextColor(ResourcesCompat.getColor(res, adapter.mText1ColorResId,
+                        null));
             }
 
             textView2 = itemView.findViewById(R.id.text2);
             if (textView2 != null) {
-                textView2.setTextColor(
-                        ResourcesCompat.getColor(res, adapter.mText2ColorResId, null));
-                textView2
-                        .setVisibility(adapter.mText2Index != UNDEFINED ? View.VISIBLE : View.GONE);
+                textView2.setTextColor(ResourcesCompat.getColor(res, adapter.mText2ColorResId,
+                        null));
+                textView2.setVisibility(adapter.mText2Index != UNDEFINED ? View.VISIBLE : View
+                        .GONE);
             }
 
             textView3 = itemView.findViewById(R.id.text3);
             if (textView3 != null) {
-                textView3.setTextColor(
-                        ResourcesCompat.getColor(res, adapter.mText3ColorResId, null));
-                textView3
-                        .setVisibility(adapter.mText3Index != UNDEFINED ? View.VISIBLE : View.GONE);
+                textView3.setTextColor(ResourcesCompat.getColor(res, adapter.mText3ColorResId,
+                        null));
+                textView3.setVisibility(adapter.mText3Index != UNDEFINED ? View.VISIBLE : View
+                        .GONE);
             }
 
             ImageView iv = itemView.findViewById(R.id.thumbnail);
@@ -346,36 +342,35 @@ public abstract class RecyclerCursorAdapter<VH extends RecyclerCursorAdapter.Vie
             }
         }
 
-        protected void initOnClickListener(final RecyclerCursorAdapter<?> adapter,
-                                           final View itemView) {
+        protected void initOnClickListener(final RecyclerCursorAdapter<?> adapter, final View
+                itemView) {
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     int position = getAdapterPosition();
                     if (position < 0) {
-                        Log.w(TAG,
-                                adapter.mFragment + " onClick() invalid position: " + position);
+                        Log.w(TAG, adapter.mFragment + " onClick() invalid position: " + position);
                         return;
                     }
-                    adapter.mOnItemClickListener
-                            .onItemClick(ViewHolder.this.itemView, position, getItemId());
+                    adapter.mOnItemClickListener.onItemClick(ViewHolder.this.itemView, position,
+                            getItemId());
                 }
             });
         }
 
-        protected void initOnLongClickListener(final RecyclerCursorAdapter<?> adapter,
-                                               final View itemView) {
+        protected void initOnLongClickListener(final RecyclerCursorAdapter<?> adapter, final View
+                itemView) {
             itemView.setOnLongClickListener(new View.OnLongClickListener() {
                 @Override
                 public boolean onLongClick(View v) {
                     int position = getAdapterPosition();
                     if (position < 0) {
-                        Log.w(TAG,
-                                adapter.mFragment + " onLongClick() invalid position: " + position);
+                        Log.w(TAG, adapter.mFragment + " onLongClick() invalid position: " +
+                                position);
                         return true;
                     }
-                    return adapter.mOnItemLongClickListener
-                            .onItemLongClick(itemView, position, getItemId());
+                    return adapter.mOnItemLongClickListener.onItemLongClick(itemView, position,
+                            getItemId());
                 }
             });
         }

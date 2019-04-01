@@ -1,14 +1,13 @@
 package com.example.gw00175646.kwfragment.fragment;
 
 
-import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.CallSuper;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.ContextMenu;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -44,7 +43,7 @@ public abstract class BaseFragment extends Fragment {
     private Unbinder mUnbinder;
 
     @Override
-    public void onSaveInstanceState(Bundle outState) {
+    public void onSaveInstanceState(@NonNull Bundle outState) {
         if (mLifeCycleLogEnabled) {
             iLog.d(mBaseTag, this + " onSaveInstanceState outState : " + outState);
         }
@@ -64,7 +63,6 @@ public abstract class BaseFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Activity a = getActivity();
         if (mLifeCycleLogEnabled) {
             iLog.d(mBaseTag,
                     this + " onCreate() - savedInstanceState: " + (savedInstanceState != null));
@@ -74,7 +72,7 @@ public abstract class BaseFragment extends Fragment {
 
     @CallSuper
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         if (mLifeCycleLogEnabled) {
             Log.d(mBaseTag, this + " onCreateView()");
@@ -85,7 +83,7 @@ public abstract class BaseFragment extends Fragment {
     protected abstract int getLayoutRes();
 
     @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
+    public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         mUnbinder = ButterKnife.bind(this, view);
         if (mLifeCycleLogEnabled) {
