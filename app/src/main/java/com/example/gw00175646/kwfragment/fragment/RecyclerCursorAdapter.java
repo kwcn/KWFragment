@@ -3,6 +3,8 @@ package com.example.gw00175646.kwfragment.fragment;
 import android.content.Context;
 import android.content.res.Resources;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.support.annotation.ColorRes;
 import android.support.annotation.DimenRes;
 import android.support.annotation.Nullable;
@@ -257,6 +259,8 @@ public abstract class RecyclerCursorAdapter<VH extends RecyclerCursorAdapter.Vie
     protected void onBindViewHolderThumbnailView(VH holder, int position, Cursor c) {
         if (holder.thumbnailView != null && mThumbnailIndex != UNDEFINED) {
             String uri = c.getString(mThumbnailIndex);
+            Bitmap bitmap = BitmapFactory.decodeFile(uri);
+            holder.thumbnailView.setImageBitmap(bitmap);
             // need use 3rd plugin load to imageView and use mThumbnailSizeResId
         }
     }
