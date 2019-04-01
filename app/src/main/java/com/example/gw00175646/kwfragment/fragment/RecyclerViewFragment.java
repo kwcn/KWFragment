@@ -64,9 +64,9 @@ public abstract class RecyclerViewFragment<T extends RecyclerCursorAdapter> exte
     @BindView(R.id.recycler_view)
     protected RecyclerView mRecyclerView;
     @BindView(R.id.progressContainer)
-    private View mProgressContainer;
+    protected View mProgressContainer;
     @BindView(R.id.listContainer)
-    private ViewGroup mListContainer;
+    protected ViewGroup mListContainer;
 
     public interface EmptyViewCreator {
         View createEmptyView();
