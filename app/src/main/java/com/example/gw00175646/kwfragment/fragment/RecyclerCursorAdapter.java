@@ -17,6 +17,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
 import com.example.gw00175646.kwfragment.R;
 
 import static com.example.gw00175646.kwfragment.fragment.DefaultConstants.UNDEFINED;
@@ -258,10 +259,9 @@ public abstract class RecyclerCursorAdapter<VH extends RecyclerCursorAdapter.Vie
 
     protected void onBindViewHolderThumbnailView(VH holder, int position, Cursor c) {
         if (holder.thumbnailView != null && mThumbnailIndex != UNDEFINED) {
-            String uri = c.getString(mThumbnailIndex);
-            Bitmap bitmap = BitmapFactory.decodeFile(uri);
-            holder.thumbnailView.setImageBitmap(bitmap);
-            // need use 3rd plugin load to imageView and use mThumbnailSizeResId
+            String url = c.getString(mThumbnailIndex);
+            Glide.with(mFragment).load(url).placeholder(R.drawable.loading).error(R.drawable
+                    .loading).into(holder.thumbnailView);
         }
     }
 

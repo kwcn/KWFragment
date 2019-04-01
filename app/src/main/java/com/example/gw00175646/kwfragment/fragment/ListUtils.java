@@ -20,10 +20,10 @@ public class ListUtils {
         String[] columns = {TestColumn.ID, TestColumn.TEXT1, TestColumn.TEXT2, TestColumn.TEXT3,
                 TestColumn.THUMBNAIL};
         MatrixCursor cursor = new MatrixCursor(columns);
-        for (int i = 0; i < 10; i++) {
+        for (int i = 1; i < 20; i++) {
             List<Object> list = new ArrayList<>();
             list.add(RecyclerCursorAdapter.convertToId(testViewType, i));
-            list.add(DefaultConstants.UNKNOWN);
+            list.add(i);
             list.add(DefaultConstants.UNKNOWN);
             list.add(DefaultConstants.UNKNOWN);
             list.add(DefaultConstants.UNKNOWN);

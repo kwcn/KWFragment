@@ -24,7 +24,8 @@ public class MyFragment extends RecyclerViewFragment<MyAdapter> {
     @Override
     protected MyAdapter onCreateAdapter() {
         return new MyAdapter.Builder(this).setText1Col(ListUtils.TestColumn.TEXT1).setText2Col
-                (ListUtils.TestColumn.TEXT2).setText3Col(ListUtils.TestColumn.TEXT3).build();
+                (ListUtils.TestColumn.TEXT2).setText3Col(ListUtils.TestColumn.TEXT3)
+                .setThumbnailCol(ListUtils.TestColumn.THUMBNAIL).build();
     }
 
     @Override
@@ -45,6 +46,19 @@ public class MyFragment extends RecyclerViewFragment<MyAdapter> {
             @Override
             public Cursor loadInBackground() {
                 return ListUtils.getTestMatrixCursor(getContext());
+            }
+
+
+            @Override
+            public void stopLoading() {
+                super.stopLoading();
+                cancelLoad();
+            }
+
+            @Override
+            protected void onStartLoading() {
+                super.onStartLoading();
+                forceLoad();
             }
         };
     }
