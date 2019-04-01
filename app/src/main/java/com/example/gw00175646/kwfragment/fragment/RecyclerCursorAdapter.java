@@ -1,38 +1,21 @@
 package com.example.gw00175646.kwfragment.fragment;
 
-import android.app.Activity;
 import android.content.Context;
-import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.database.Cursor;
-import android.graphics.drawable.Drawable;
-import android.net.Uri;
 import android.support.annotation.ColorRes;
 import android.support.annotation.DimenRes;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.res.ResourcesCompat;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
-import android.util.SparseArray;
-import android.util.SparseBooleanArray;
-import android.util.SparseIntArray;
-import android.util.TypedValue;
-import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewStub;
-import android.widget.CheckBox;
 import android.widget.ImageView;
-import android.widget.RadioButton;
 import android.widget.TextView;
 
 import com.example.gw00175646.kwfragment.R;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import static com.example.gw00175646.kwfragment.fragment.DefaultConstants.UNDEFINED;
 
@@ -45,11 +28,7 @@ public abstract class RecyclerCursorAdapter<VH extends RecyclerCursorAdapter.Vie
     private final String mText1Col;
     private final String mText2Col;
     private final String mText3Col;
-    private final String mThumbnailId;
-    private final String mThumbnailFullUriCol;
-    private final String mKeywordCol;
-    private final SparseArray<Uri> mThumbnailUriSet;
-    private final Uri mThumbnailUri;
+    private final String mThumbnailCol;
     @ColorRes
     private final int mText1ColorResId;
     @ColorRes
@@ -58,26 +37,15 @@ public abstract class RecyclerCursorAdapter<VH extends RecyclerCursorAdapter.Vie
     private final int mText3ColorResId;
     @DimenRes
     private final int mThumbnailSizeResId;
-    private float mText1FontSize = UNDEFINED;
-    private final SparseArray<View> mPredefinedHeaderViews = new SparseArray<>();
-    private final SparseIntArray mPredefinedViewResources = new SparseIntArray();
-    private final List<Integer> mHeaderViewTypes = new ArrayList<>();
-    private final List<Integer> mFooterViewTypes = new ArrayList<>();
     protected final RecyclerViewableList mRecyclerViewableList;
 
-    private OnHeaderViewCreatedListener mOnHeaderViewCreatedListener;
     private int mRowIDColumn;
     protected int mText1Index = UNDEFINED;
     protected int mText2Index = UNDEFINED;
     protected int mText3Index = UNDEFINED;
-    protected int mThumbnailKeyIndex = UNDEFINED;
-    private int mThumbnailFullUriIndex = UNDEFINED;
-    private int mPrivateModeColIndex = UNDEFINED;
-    protected int mKeywordIndex = UNDEFINED;
-    protected int mCpAttrsColIndex = UNDEFINED;
+    protected int mThumbnailIndex = UNDEFINED;
     private OnItemClickListener mOnItemClickListener;
     private OnItemLongClickListener mOnItemLongClickListener;
-    private OnItemLayoutChangedListener mOnHeaderItemLayoutChangedListener;
     private View.OnGenericMotionListener mOnGenericMotionListener;
     boolean mDataValid;
     private Cursor mCursor;
@@ -90,15 +58,6 @@ public abstract class RecyclerCursorAdapter<VH extends RecyclerCursorAdapter.Vie
         boolean onItemLongClick(View view, int position, long id);
     }
 
-    public interface OnItemLayoutChangedListener {
-        void onLayoutChange(View view, int position, int left, int top, int right, int bottom,
-                            int oldLeft, int oldTop, int oldRight, int oldBottom);
-    }
-
-    public interface OnHeaderViewCreatedListener {
-        void onHeaderViewCreated(int viewType, View headerView);
-    }
-
     public RecyclerCursorAdapter(AbsBuilder<?> builder) {
         mFragment = builder.mFragment;
         mRecyclerViewableList =
@@ -108,16 +67,12 @@ public abstract class RecyclerCursorAdapter<VH extends RecyclerCursorAdapter.Vie
         mText1Col = builder.mText1Col;
         mText2Col = builder.mText2Col;
         mText3Col = builder.mText3Col;
-        mThumbnailId = builder.mThumbnailId;
-        mThumbnailFullUriCol = builder.mThumbnailFullUriCol;
-        mKeywordCol = builder.mKeywordCol;
+        mThumbnailCol = builder.mThumbnailCol;
 
         mText1ColorResId = builder.mText1ColorResId;
         mText2ColorResId = builder.mText2ColorResId;
         mText3ColorResId = builder.mText3ColorResId;
 
-        mThumbnailUriSet = builder.mThumbnailUriSet;
-        mThumbnailUri = builder.mThumbnailUri;
         mThumbnailSizeResId = builder.mThumbnailSizeResId;
 
         setHasStableIds(true);
@@ -125,22 +80,8 @@ public abstract class RecyclerCursorAdapter<VH extends RecyclerCursorAdapter.Vie
 
     @Override
     public VH onCreateViewHolder(ViewGroup parent, int viewType) {
-        View predefinedView = mPredefinedHeaderViews.get(viewType);
-        int resource = mPredefinedViewResources.get(viewType, UNDEFINED);
-        if (predefinedView == null && resource != UNDEFINED) {
-            predefinedView =
-                    LayoutInflater.from(mFragment.getActivity()).inflate(resource, parent, false);
-            if (mOnHeaderViewCreatedListener != null && mHeaderViewTypes.contains(viewType)) {
-                mOnHeaderViewCreatedListener.onHeaderViewCreated(viewType, predefinedView);
-            }
-        }
-        iLog.d(TAG,
-                mFragment + " | " + TAG + " onCreateViewHolder() viewType: " + viewType +
-                        " | predefinedView: " + predefinedView);
-        VH holder = onCreateViewHolder(parent, viewType, predefinedView);
-        if (holder.textView1 != null && mText1FontSize == UNDEFINED) {
-            mText1FontSize = holder.textView1.getTextSize();
-        }
+        // need add headView
+        VH holder = onCreateViewHolder(parent, viewType, null);
         return holder;
     }
 
@@ -157,12 +98,7 @@ public abstract class RecyclerCursorAdapter<VH extends RecyclerCursorAdapter.Vie
 
         Cursor c = getCursorOrThrow(position);
         onBindViewHolderTextView(holder, position, c);
-        if (holder.radioButton != null) {
-            onBindViewHolderRadioButton(holder, position);
-        }
-        if (holder.thumbnailView != null) {
-            onBindViewHolderThumbnailView(holder, position, c);
-        }
+        onBindViewHolderThumbnailView(holder, position, c);
 
         onBindViewHolderItemEnabled(holder, position);
     }
@@ -198,16 +134,6 @@ public abstract class RecyclerCursorAdapter<VH extends RecyclerCursorAdapter.Vie
     public long getItemId(int position) {
         Cursor c = getCursor(position);
         return c != null ? c.getLong(mRowIDColumn) : UNDEFINED;
-    }
-
-    @Nullable
-    public String getItemKeyword(int position) {
-        if (mKeywordIndex != UNDEFINED) {
-            Cursor c = getCursor(position);
-            return c != null ? c.getString(mKeywordIndex) : null;
-        } else {
-            return null;
-        }
     }
 
     @Nullable
@@ -251,14 +177,8 @@ public abstract class RecyclerCursorAdapter<VH extends RecyclerCursorAdapter.Vie
         if (mText3Col != null) {
             mText3Index = newCursor.getColumnIndexOrThrow(mText3Col);
         }
-        if (mThumbnailId != null) {
-            mThumbnailKeyIndex = newCursor.getColumnIndexOrThrow(mThumbnailId);
-        }
-        if (mThumbnailFullUriCol != null) {
-            mThumbnailFullUriIndex = newCursor.getColumnIndexOrThrow(mThumbnailFullUriCol);
-        }
-        if (mKeywordCol != null) {
-            mKeywordIndex = newCursor.getColumnIndexOrThrow(mKeywordCol);
+        if (mThumbnailCol != null) {
+            mThumbnailIndex = newCursor.getColumnIndexOrThrow(mThumbnailCol);
         }
     }
 
@@ -284,37 +204,17 @@ public abstract class RecyclerCursorAdapter<VH extends RecyclerCursorAdapter.Vie
             mDataValid = false;
             //   invokeNotifyDataSetChanged();
         }
-        //        if (mReorderState.isEnabled()) {
-        //            mReorderState.resetPositions(getItemCount());
-        //        }
         return oldCursor;
     }
 
-    /**
-     * Returns the cursor.
-     *
-     * @return the cursor.
-     */
     public Cursor getCursor() {
         return mCursor;
     }
 
-    /**
-     * Sub classes can use this method to access cursor matched position
-     *
-     * @param position position of recyclerView
-     * @return cursor matched with position
-     */
     public Cursor getCursor(int position) {
         return getCursorInternal(position, false);
     }
 
-    /**
-     * Sub classes can use this method to access cursor matched position
-     *
-     * @param position position of recyclerView
-     * @return cursor matched with position
-     */
     protected final Cursor getCursorOrThrow(int position) {
         return getCursorInternal(position, true);
     }
@@ -355,24 +255,9 @@ public abstract class RecyclerCursorAdapter<VH extends RecyclerCursorAdapter.Vie
     }
 
     protected void onBindViewHolderThumbnailView(VH holder, int position, Cursor c) {
-        if (mThumbnailFullUriIndex != UNDEFINED) {
-//            AsyncArtworkLoader.withDimension(mThumbnailSizeResId)
-//                    .withFullUri(c.getString(mThumbnailFullUriIndex)).loadToPublisher(
-//                    new RecyclerImageViewPublisher(holder.thumbnailView,
-//                            MDefaultArtworkUtils.DEFAULT_ALBUM_ART, mIsDownKeyPerforming));
-            return;
-        }
-
-//        AsyncArtworkLoader.withDimension(mThumbnailSizeResId).withBaseUri(uri, albumId)
-//                .loadToPublisher(new RecyclerImageViewPublisher(holder.thumbnailView,
-//                        MDefaultArtworkUtils.DEFAULT_ALBUM_ART, mIsDownKeyPerforming));
-    }
-
-    private void onBindViewHolderRadioButton(VH holder, int position) {
-        if (mRecyclerViewableList != null) {
-//            holder.radioButton.setChecked(
-//                    mRecyclerViewableList.getRecyclerView().getCheckedItemPositions()
-//                            .get(position));
+        if (holder.thumbnailView != null && mThumbnailIndex != UNDEFINED) {
+            String uri = c.getString(mThumbnailIndex);
+            // need use 3rd plugin load to imageView;
         }
     }
 
@@ -393,12 +278,6 @@ public abstract class RecyclerCursorAdapter<VH extends RecyclerCursorAdapter.Vie
         public final TextView textView2;
         public final TextView textView3;
         public final ImageView thumbnailView;
-        public final RadioButton radioButton;
-
-        public final List<View> animateViews = new ArrayList<>();
-        public final List<Integer> animateViewLayers = new ArrayList<>();
-
-        private View.OnGenericMotionListener mOnGenericMotionListener;
 
         public ViewHolder(final RecyclerCursorAdapter<?> adapter, final View itemView,
                           int viewType) {
@@ -412,21 +291,15 @@ public abstract class RecyclerCursorAdapter<VH extends RecyclerCursorAdapter.Vie
                 initOnLongClickListener(adapter, itemView);
             }
 
-//            if (adapter.hasHeaderView(viewType)) {
-//                initOnHeaderItemLayoutChangedListener(adapter, itemView);
-//            }
-
             Resources res = adapter.mFragment.getResources();
 
-            textView1 = null;
-            //itemView.findViewById(R.id.text1);
+            textView1 = itemView.findViewById(R.id.text1);
             if (textView1 != null) {
                 textView1.setTextColor(
                         ResourcesCompat.getColor(res, adapter.mText1ColorResId, null));
             }
 
-            textView2 = null;
-            //itemView.findViewById(R.id.text2);
+            textView2 = itemView.findViewById(R.id.text2);
             if (textView2 != null) {
                 textView2.setTextColor(
                         ResourcesCompat.getColor(res, adapter.mText2ColorResId, null));
@@ -434,8 +307,7 @@ public abstract class RecyclerCursorAdapter<VH extends RecyclerCursorAdapter.Vie
                         .setVisibility(adapter.mText2Index != UNDEFINED ? View.VISIBLE : View.GONE);
             }
 
-            textView3 = null;
-            //itemView.findViewById(R.id.text3);
+            textView3 = itemView.findViewById(R.id.text3);
             if (textView3 != null) {
                 textView3.setTextColor(
                         ResourcesCompat.getColor(res, adapter.mText3ColorResId, null));
@@ -443,12 +315,10 @@ public abstract class RecyclerCursorAdapter<VH extends RecyclerCursorAdapter.Vie
                         .setVisibility(adapter.mText3Index != UNDEFINED ? View.VISIBLE : View.GONE);
             }
 
-            ImageView iv = null;
-            //itemView.findViewById(R.id.thumbnail);
+            ImageView iv = itemView.findViewById(R.id.thumbnail);
 
             if (iv != null) {
-                if (adapter.mThumbnailKeyIndex != UNDEFINED ||
-                        adapter.mThumbnailFullUriIndex != UNDEFINED) {
+                if (adapter.mThumbnailIndex != UNDEFINED) {
                     iv.setVisibility(View.VISIBLE);
                     thumbnailView = iv;
                 } else {
@@ -457,23 +327,6 @@ public abstract class RecyclerCursorAdapter<VH extends RecyclerCursorAdapter.Vie
                 }
             } else {
                 thumbnailView = null;
-            }
-
-            radioButton = (RadioButton) itemView.findViewById(R.id.radio);
-
-            final View thumbnailLayout = null;
-            //itemView.findViewById(R.id.thumbnail_layout);
-            if (thumbnailLayout != null) {
-                addAnimateView(thumbnailLayout);
-            }
-            final View textLayout = null;
-            //itemView.findViewById(R.id.text_layout);
-            if (textLayout != null) {
-                addAnimateView(textLayout);
-            } else {
-                if (textView1 != null) {
-                    addAnimateView(textView1);
-                }
             }
         }
 
@@ -510,16 +363,9 @@ public abstract class RecyclerCursorAdapter<VH extends RecyclerCursorAdapter.Vie
                 }
             });
         }
-
-        protected void addAnimateView(View view) {
-            animateViews.add(view);
-            animateViewLayers.add(view.getLayerType());
-        }
     }
 
     protected static abstract class AbsBuilder<T extends AbsBuilder<T>> {
-        protected static final boolean DEBUG_BUILDER = false;
-
         protected final Fragment mFragment;
 
         private final Context mContext;
@@ -530,31 +376,22 @@ public abstract class RecyclerCursorAdapter<VH extends RecyclerCursorAdapter.Vie
 
         private String mText3Col = null;
 
-        private String mThumbnailId = null;
-
-        private String mThumbnailFullUriCol = null;
-
-        private String mKeywordCol = null;
-
-        private Uri mThumbnailUri;
-
-        private final SparseArray<Uri> mThumbnailUriSet = new SparseArray<>();
+        private String mThumbnailCol = null;
 
         @ColorRes
-        private int mText1ColorResId = 0;
-        //R.color.blur_text;
+        private int mText1ColorResId = android.support.v4.R.color
+                .secondary_text_default_material_light;
 
         @ColorRes
-        private int mText2ColorResId = 0;
-        //R.color.blur_text;
+        private int mText2ColorResId = android.support.v4.R.color
+                .secondary_text_default_material_light;
 
         @ColorRes
-        private int mText3ColorResId = 0;
-        //R.color.blur_text;
+        private int mText3ColorResId = android.support.v4.R.color
+                .secondary_text_default_material_light;
 
         @DimenRes
-        private int mThumbnailSizeResId = 0;
-        //R.dimen.bitmap_size_middle;
+        private int mThumbnailSizeResId = R.dimen.bitmap_size_middle;
 
         protected abstract T self();
 
@@ -578,24 +415,8 @@ public abstract class RecyclerCursorAdapter<VH extends RecyclerCursorAdapter.Vie
             return self();
         }
 
-        public T setKeywordCol(String column) {
-            mKeywordCol = column;
-            return self();
-        }
-
-        public T setThumbnailKey(String column) {
-            mThumbnailId = column;
-            return self();
-        }
-
-        public T setThumbnailKey(String column, Uri thumbnailUri) {
-            mThumbnailId = column;
-            mThumbnailUri = thumbnailUri;
-            return self();
-        }
-
-        public T setThumbnailFullUriCol(String column) {
-            mThumbnailFullUriCol = column;
+        public T setThumbnailCol(String column) {
+            mThumbnailCol = column;
             return self();
         }
 
@@ -614,18 +435,11 @@ public abstract class RecyclerCursorAdapter<VH extends RecyclerCursorAdapter.Vie
             return self();
         }
 
-        public T addThumbnailUri(int cpAttrs, Uri uri) {
-            mThumbnailUriSet.put(cpAttrs, uri);
-            return self();
-        }
-
         public T setThumbnailSize(@DimenRes int size) {
             mThumbnailSizeResId = size;
             return self();
         }
 
-        public RecyclerCursorAdapter build() {
-            return null;
-        }
+        public abstract RecyclerCursorAdapter build();
     }
 }
