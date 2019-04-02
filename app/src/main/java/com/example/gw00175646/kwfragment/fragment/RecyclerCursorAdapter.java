@@ -181,6 +181,7 @@ public abstract class RecyclerCursorAdapter<VH extends RecyclerCursorAdapter.Vie
         }
     }
 
+    // 刷新数据到界面
     public Cursor swapCursor(Cursor newCursor) {
         iLog.d(TAG, mFragment + " | " + TAG + " swapCursor() | prevCursor: " + mCursor + " | " +
                 "newCursor: " + newCursor);
@@ -197,11 +198,11 @@ public abstract class RecyclerCursorAdapter<VH extends RecyclerCursorAdapter.Vie
         if (newCursorCount != 0) {
             mRowIDColumn = newCursor.getColumnIndexOrThrow("_id");
             mDataValid = true;
-            // invokeNotifyDataSetChanged();
+            notifyDataSetChanged();
         } else {
             mRowIDColumn = UNDEFINED;
             mDataValid = false;
-            //   invokeNotifyDataSetChanged();
+            notifyDataSetChanged();
         }
         return oldCursor;
     }

@@ -8,6 +8,7 @@ import android.support.v4.content.AsyncTaskLoader;
 import android.support.v4.content.Loader;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
 
 import com.example.gw00175646.kwfragment.fragment.ListUtils;
@@ -18,6 +19,7 @@ public class MyFragment extends RecyclerViewFragment<MyAdapter> {
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        setUpdateThrottle(0);
         initListLoader(1);
     }
 
@@ -67,4 +69,5 @@ public class MyFragment extends RecyclerViewFragment<MyAdapter> {
             }
         };
     }
+
 }

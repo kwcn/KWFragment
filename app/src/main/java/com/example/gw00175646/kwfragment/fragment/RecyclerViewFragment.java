@@ -33,6 +33,7 @@ public abstract class RecyclerViewFragment<T extends RecyclerCursorAdapter> exte
         implements LoaderCallbacks<Cursor> {
 
     private static final String TAG = "RecyclerViewFragment";
+    // 2000ms后才能再次加载数据到界面，避免频繁绘制
     public static final int BASE_THROTTLE_TIME = 2000;
     // 显示界面进入动画
     protected static final int LIST_SHOWN_WITH_ANIMATION = 0x00000001;
@@ -236,6 +237,7 @@ public abstract class RecyclerViewFragment<T extends RecyclerCursorAdapter> exte
 
         @Override
         public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+            iLog.d(TAG, mFragment + " ListLoaderCallbacksWrapper.onCreateLoader() id: " + id);
             return mFragment.onCreateLoader(id, args);
         }
 
@@ -266,6 +268,8 @@ public abstract class RecyclerViewFragment<T extends RecyclerCursorAdapter> exte
 
         @Override
         public void onLoaderReset(Loader<Cursor> loader) {
+            iLog.d(TAG, mFragment + " ListLoaderCallbacksWrapper.onLoaderReset() id: " + loader
+                    .getId());
             mFragment.onLoaderReset(loader);
         }
     }
