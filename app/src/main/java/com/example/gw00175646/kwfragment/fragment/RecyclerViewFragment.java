@@ -5,10 +5,8 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.MatrixCursor;
 import android.os.Bundle;
-import android.support.annotation.LayoutRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.annotation.StringRes;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.AsyncTaskLoader;
@@ -16,11 +14,10 @@ import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.RecyclerView.LayoutManager;
-import android.view.LayoutInflater;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AnimationUtils;
-import android.widget.TextView;
 
 import com.example.gw00175646.kwfragment.R;
 
@@ -37,6 +34,10 @@ public abstract class RecyclerViewFragment<T extends RecyclerCursorAdapter> exte
 
     private static final String TAG = "RecyclerViewFragment";
     public static final int BASE_THROTTLE_TIME = 2000;
+    // 显示界面进入动画
+    protected static final int LIST_SHOWN_WITH_ANIMATION = 0x00000001;
+    // 显示进度条
+    protected static final int LIST_SHOWN_WITH_LOADING_PROGRESS = 0x0000002;
 
     private final HashSet<Integer> mListLoaderIds = new HashSet<>();
     private final HashSet<Integer> mExtraLoaderIds = new HashSet<>();
@@ -46,11 +47,16 @@ public abstract class RecyclerViewFragment<T extends RecyclerCursorAdapter> exte
     private Context mContext;
     protected T mAdapter;
     private int mUpdateThrottle = BASE_THROTTLE_TIME;
+    private boolean mListShown = true;
+    private boolean mShownWithAnimation = false;
+    private boolean mShownWithLoadingProgress = false;
 
     @BindView(R.id.recycler_view)
-    protected RecyclerView mRecyclerView;
+    RecyclerView mRecyclerView;
     @BindView(R.id.listContainer)
-    protected ViewGroup mListContainer;
+    ViewGroup mListContainer;
+    @BindView(R.id.progressContainer)
+    View mProgressContainer;
 
     @Override
     public void onAttach(Context context) {
@@ -61,11 +67,17 @@ public abstract class RecyclerViewFragment<T extends RecyclerCursorAdapter> exte
     }
 
     @Override
+    protected int getLayoutRes() {
+        return R.layout.ui_recycler_view_list;
+    }
+
+    @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         mRecyclerView.setLayoutManager(onCreateLayoutManager());
         mAdapter = onCreateAdapter();
         mRecyclerView.setAdapter(mAdapter);
+        setListShown(false, LIST_SHOWN_WITH_ANIMATION | LIST_SHOWN_WITH_LOADING_PROGRESS);
     }
 
     @NonNull
@@ -81,6 +93,10 @@ public abstract class RecyclerViewFragment<T extends RecyclerCursorAdapter> exte
     @Override
     public void onLoadFinished(@NonNull Loader<Cursor> loader, Cursor cursor) {
         mAdapter.swapCursor(cursor);
+        int count = cursor.getCount();
+        if (count > 0) {
+            setListShown(true);
+        }
     }
 
     @Override
@@ -94,9 +110,53 @@ public abstract class RecyclerViewFragment<T extends RecyclerCursorAdapter> exte
 
     protected abstract QueryArgs onCreateQueryArgs(int id);
 
-    @Override
-    protected int getLayoutRes() {
-        return R.layout.ui_recycler_view_list;
+    protected final void setListShown(boolean shown, int flags) {
+        mShownWithAnimation = (flags & LIST_SHOWN_WITH_ANIMATION) == LIST_SHOWN_WITH_ANIMATION;
+        mShownWithLoadingProgress = (flags & LIST_SHOWN_WITH_LOADING_PROGRESS) ==
+                LIST_SHOWN_WITH_LOADING_PROGRESS;
+        iLog.d(TAG, this + " setListShownFlag() | mShownWithAnimation: " + mShownWithAnimation +
+                " | mShownWithLoadingProgress: " + mShownWithLoadingProgress);
+        setListShown(shown);
+    }
+
+    protected final void setListShown(boolean shown) {
+        iLog.d(TAG, this + " setListShown() - shown: " + shown);
+        if (mProgressContainer == null) {
+            throw new IllegalStateException("Can't be used with a custom content view");
+        }
+        if (mListShown == shown) {
+            return;
+        }
+        mListShown = shown;
+        if (shown) {
+            if (mShownWithAnimation) {
+                mProgressContainer.startAnimation(
+                        AnimationUtils.loadAnimation(mContext, android.R.anim.fade_out));
+                mListContainer.startAnimation(
+                        AnimationUtils.loadAnimation(mContext, android.R.anim.fade_in));
+            } else {
+                mProgressContainer.clearAnimation();
+                mListContainer.clearAnimation();
+            }
+            mProgressContainer.setVisibility(View.GONE);
+            mListContainer.setVisibility(View.VISIBLE);
+        } else {
+            if (mShownWithAnimation) {
+                mProgressContainer.startAnimation(
+                        AnimationUtils.loadAnimation(mContext, android.R.anim.fade_in));
+                mListContainer.startAnimation(
+                        AnimationUtils.loadAnimation(mContext, android.R.anim.fade_out));
+            } else {
+                mProgressContainer.clearAnimation();
+                mListContainer.clearAnimation();
+            }
+            if (mShownWithLoadingProgress) {
+                mProgressContainer.setVisibility(View.VISIBLE);
+            } else {
+                mProgressContainer.setVisibility(View.GONE);
+            }
+            mListContainer.setVisibility(View.GONE);
+        }
     }
 
     protected final void setUpdateThrottle(int updateThrottle) {

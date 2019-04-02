@@ -45,6 +45,11 @@ public class MyFragment extends RecyclerViewFragment<MyAdapter> {
             @Nullable
             @Override
             public Cursor loadInBackground() {
+                try {
+                    Thread.sleep(2000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
                 return ListUtils.getTestMatrixCursor(getContext());
             }
 
