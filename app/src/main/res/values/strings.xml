@@ -2,4 +2,6 @@
     <string name="app_name">KWFragment</string>
     <string name="unknown">unknown</string>
     <string name="loading">Loading\u2026</string>
+    <string name="no_content">No content</string>
+    <string name="again_laod">重新加载</string>
 </resources>

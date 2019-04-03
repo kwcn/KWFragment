@@ -5,8 +5,10 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.MatrixCursor;
 import android.os.Bundle;
+import android.support.annotation.LayoutRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.StringRes;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.AsyncTaskLoader;
@@ -14,10 +16,11 @@ import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.RecyclerView.LayoutManager;
-import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AnimationUtils;
+import android.widget.TextView;
 
 import com.example.gw00175646.kwfragment.R;
 
@@ -39,6 +42,8 @@ public abstract class RecyclerViewFragment<T extends RecyclerCursorAdapter> exte
     protected static final int LIST_SHOWN_WITH_ANIMATION = 0x00000001;
     // 显示进度条
     protected static final int LIST_SHOWN_WITH_LOADING_PROGRESS = 0x0000002;
+    // 显示空界面
+    protected static final int LIST_SHOWN_WITH_EMPTY_PAGE = 0x00000004;
 
     private final HashSet<Integer> mListLoaderIds = new HashSet<>();
     private final HashSet<Integer> mExtraLoaderIds = new HashSet<>();
@@ -51,6 +56,13 @@ public abstract class RecyclerViewFragment<T extends RecyclerCursorAdapter> exte
     private boolean mListShown = true;
     private boolean mShownWithAnimation = false;
     private boolean mShownWithLoadingProgress = false;
+    private boolean mShownWithEmptyPage = false;
+    @LayoutRes
+    private int mEmptyViewLayoutResId = UNDEFINED;
+    @StringRes
+    private int mEmptyViewStringResId = UNDEFINED;
+    private View mEmptyView;
+    private EmptyViewCreator mEmptyViewCreator;
 
     @BindView(R.id.recycler_view)
     RecyclerView mRecyclerView;
@@ -58,6 +70,10 @@ public abstract class RecyclerViewFragment<T extends RecyclerCursorAdapter> exte
     ViewGroup mListContainer;
     @BindView(R.id.progressContainer)
     View mProgressContainer;
+
+    public interface EmptyViewCreator {
+        View createEmptyView();
+    }
 
     @Override
     public void onAttach(Context context) {
@@ -67,7 +83,6 @@ public abstract class RecyclerViewFragment<T extends RecyclerCursorAdapter> exte
         mContext = context.getApplicationContext();
     }
 
-    // 默认设置fragment ui，重写可以改变
     @Override
     protected int getLayoutRes() {
         return R.layout.ui_recycler_view_list;
@@ -79,8 +94,11 @@ public abstract class RecyclerViewFragment<T extends RecyclerCursorAdapter> exte
         mRecyclerView.setLayoutManager(onCreateLayoutManager());
         mAdapter = onCreateAdapter();
         mRecyclerView.setAdapter(mAdapter);
-        // 默认设置，显示动画和加载进度条
-        setListShown(false, LIST_SHOWN_WITH_ANIMATION | LIST_SHOWN_WITH_LOADING_PROGRESS);
+        // 默认设置使用动画、加载进度条和空界面
+        setListShown(false, LIST_SHOWN_WITH_ANIMATION | LIST_SHOWN_WITH_LOADING_PROGRESS |
+                LIST_SHOWN_WITH_EMPTY_PAGE);
+        // 设置默认空界面
+        setEmptyView(R.layout.default_empty_view, R.string.no_content);
     }
 
     @NonNull
@@ -97,10 +115,7 @@ public abstract class RecyclerViewFragment<T extends RecyclerCursorAdapter> exte
     @Override
     public void onLoadFinished(@NonNull Loader<Cursor> loader, Cursor cursor) {
         mAdapter.swapCursor(cursor);
-        int count = cursor.getCount();
-        if (count > 0) {
-            setListShown(true);
-        }
+        setListShown(cursor.getCount() > 0 || mShownWithEmptyPage);
     }
 
     @Override
@@ -114,12 +129,17 @@ public abstract class RecyclerViewFragment<T extends RecyclerCursorAdapter> exte
 
     protected abstract QueryArgs onCreateQueryArgs(int id);
 
+    // 设置列表显示，并设置过程中是否使用动画、进度条和空界面
     protected final void setListShown(boolean shown, int flags) {
         mShownWithAnimation = (flags & LIST_SHOWN_WITH_ANIMATION) == LIST_SHOWN_WITH_ANIMATION;
         mShownWithLoadingProgress = (flags & LIST_SHOWN_WITH_LOADING_PROGRESS) ==
                 LIST_SHOWN_WITH_LOADING_PROGRESS;
-        iLog.d(TAG, this + " setListShownFlag() | mShownWithAnimation: " + mShownWithAnimation +
-                " | mShownWithLoadingProgress: " + mShownWithLoadingProgress);
+        mShownWithEmptyPage =
+                (flags & LIST_SHOWN_WITH_EMPTY_PAGE) == LIST_SHOWN_WITH_EMPTY_PAGE;
+        iLog.d(TAG,
+                this + " setListShownFlag() | mShownWithAnimation: " + mShownWithAnimation +
+                        " | mShownWithLoadingProgress: " + mShownWithLoadingProgress +
+                        " | mShownOnlyHavingValidDataOnly: " + mShownWithEmptyPage);
         setListShown(shown);
     }
 
@@ -163,6 +183,48 @@ public abstract class RecyclerViewFragment<T extends RecyclerCursorAdapter> exte
         }
     }
 
+    // 设置空界面
+    protected final void setEmptyView(@LayoutRes int layoutResId, @StringRes int stringResId) {
+        mEmptyView = null;
+        mEmptyViewLayoutResId = layoutResId;
+        mEmptyViewStringResId = stringResId;
+    }
+
+    protected final void setEmptyView(EmptyViewCreator emptyViewCreator) {
+        mEmptyView = null;
+        mEmptyViewCreator = emptyViewCreator;
+    }
+
+    protected final void setEmptyViewVisibility(boolean isEmpty) {
+        if (isEmpty) {
+            if (mEmptyView == null) {
+                if (mEmptyViewCreator != null) {
+                    mEmptyView = mEmptyViewCreator.createEmptyView();
+                    mListContainer.addView(mEmptyView);
+                } else if (mEmptyViewLayoutResId != UNDEFINED) {
+                    mEmptyView = LayoutInflater.from(getActivity())
+                            .inflate(mEmptyViewLayoutResId, mListContainer, false);
+                    TextView textView = mEmptyView.findViewById(R.id.no_item_text);
+                    if (textView == null) {
+                        throw new RuntimeException("no item view must contains R.id.no_item_text");
+                    }
+                    textView.setText(mEmptyViewStringResId);
+                    mListContainer.addView(mEmptyView);
+                }
+            }
+            if (mEmptyView != null) {
+                mRecyclerView.setVisibility(View.INVISIBLE);
+                mEmptyView.setVisibility(View.VISIBLE);
+            }
+        } else {
+            if (mEmptyView != null) {
+                mRecyclerView.setVisibility(View.VISIBLE);
+                mEmptyView.setVisibility(View.GONE);
+            }
+        }
+    }
+
+    // 设置数据刷新阀值
     protected final void setUpdateThrottle(int updateThrottle) {
         mUpdateThrottle = updateThrottle;
     }
@@ -267,7 +329,7 @@ public abstract class RecyclerViewFragment<T extends RecyclerCursorAdapter> exte
             }
 
             int count = data != null ? data.getCount() : 0;
-            //setEmptyViewVisibility(count == 0);
+            setEmptyViewVisibility(count == 0);
             mFragment.onLoadFinished(loader, data);
         }
 

@@ -8,7 +8,7 @@ import android.support.v4.content.AsyncTaskLoader;
 import android.support.v4.content.Loader;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 
 import com.example.gw00175646.kwfragment.fragment.ListUtils;
@@ -20,6 +20,23 @@ public class MyFragment extends RecyclerViewFragment<MyAdapter> {
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         setUpdateThrottle(0);
+        setEmptyView(new EmptyViewCreator() {
+            @Override
+            public View createEmptyView() {
+                View againLoadView = LayoutInflater.from(getContext()).inflate(R.layout
+                                .again_load_view,
+                        null);
+                againLoadView.findViewById(R.id.again_load).setOnClickListener(new View
+                        .OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        ListUtils.setTestMatrixCursor();
+                        restartListLoader();
+                    }
+                });
+                return againLoadView;
+            }
+        });
         // 启动loader，异步加载数据到界面
         initListLoader(1);
     }
@@ -54,7 +71,7 @@ public class MyFragment extends RecyclerViewFragment<MyAdapter> {
             public Cursor loadInBackground() {
                 // 加载耗时数据
                 try {
-                    Thread.sleep(2000);
+                    Thread.sleep(1000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }

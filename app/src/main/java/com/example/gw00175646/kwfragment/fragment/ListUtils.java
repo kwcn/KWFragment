@@ -15,11 +15,13 @@ public class ListUtils {
         String THUMBNAIL = "thumbnail";
     }
 
-    public static MatrixCursor getTestMatrixCursor(Context context) {
-        int testViewType = 1;
+    public static MatrixCursor mCursor;
+
+    public static void setTestMatrixCursor() {
         String[] columns = {TestColumn.ID, TestColumn.TEXT1, TestColumn.TEXT2, TestColumn.TEXT3,
                 TestColumn.THUMBNAIL};
-        MatrixCursor cursor = new MatrixCursor(columns);
+        mCursor = new MatrixCursor(columns);
+        int testViewType = 1;
         for (int i = 1; i < 20; i++) {
             List<Object> list = new ArrayList<>();
             list.add(RecyclerCursorAdapter.convertToId(testViewType, i));
@@ -27,8 +29,16 @@ public class ListUtils {
             list.add(DefaultConstants.UNKNOWN);
             list.add(DefaultConstants.UNKNOWN);
             list.add(DefaultConstants.UNKNOWN);
-            cursor.addRow(list);
+            mCursor.addRow(list);
         }
-        return cursor;
+    }
+
+    public static MatrixCursor getTestMatrixCursor(Context context) {
+        if (mCursor == null) {
+            String[] columns = {TestColumn.ID, TestColumn.TEXT1, TestColumn.TEXT2, TestColumn.TEXT3,
+                    TestColumn.THUMBNAIL};
+            mCursor = new MatrixCursor(columns);
+        }
+        return mCursor;
     }
 }
