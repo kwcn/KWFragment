@@ -8,7 +8,8 @@ import android.view.ViewGroup;
 
 import com.example.gw00175646.kwfragment.fragment.RecyclerCursorAdapter;
 
-public class MyAdapter extends RecyclerCursorAdapter<MyAdapter.ViewHolder> {
+
+public class MyAdapter extends RecyclerCursorAdapter<RecyclerCursorAdapter.ViewHolder> {
 
     public MyAdapter(AbsBuilder<?> builder) {
         super(builder);
@@ -21,13 +22,6 @@ public class MyAdapter extends RecyclerCursorAdapter<MyAdapter.ViewHolder> {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_item_layout,
                 parent, false);
         return new ViewHolder(this, view, viewType);
-    }
-
-    public static class ViewHolder extends RecyclerCursorAdapter.ViewHolder {
-
-        public ViewHolder(RecyclerCursorAdapter<?> adapter, View itemView, int viewType) {
-            super(adapter, itemView, viewType);
-        }
     }
 
     // adapter构造器，设置数据库数据和控件绑定
