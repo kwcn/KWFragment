@@ -67,6 +67,7 @@ public abstract class RecyclerViewFragment<T extends RecyclerCursorAdapter> exte
         mContext = context.getApplicationContext();
     }
 
+    // 默认设置fragment ui，重写可以改变
     @Override
     protected int getLayoutRes() {
         return R.layout.ui_recycler_view_list;
@@ -78,6 +79,7 @@ public abstract class RecyclerViewFragment<T extends RecyclerCursorAdapter> exte
         mRecyclerView.setLayoutManager(onCreateLayoutManager());
         mAdapter = onCreateAdapter();
         mRecyclerView.setAdapter(mAdapter);
+        // 默认设置，显示动画和加载进度条
         setListShown(false, LIST_SHOWN_WITH_ANIMATION | LIST_SHOWN_WITH_LOADING_PROGRESS);
     }
 
@@ -85,6 +87,7 @@ public abstract class RecyclerViewFragment<T extends RecyclerCursorAdapter> exte
     @Override
     public Loader<Cursor> onCreateLoader(int id, @Nullable Bundle bundle) {
         QueryArgs args = onCreateQueryArgs(id);
+        // CursorLoader里注册观察者，当db发生改变时会驱动数据界面刷新
         AsyncTaskLoader loader = new CursorLoader(mContext, args.uri, args.projection, args
                 .selection, args.selectionArgs, args.orderBy);
         loader.setUpdateThrottle(mUpdateThrottle);
@@ -172,6 +175,7 @@ public abstract class RecyclerViewFragment<T extends RecyclerCursorAdapter> exte
         return mRecyclerView;
     }
 
+    // 开启loader管理器，当id相同时，如果之前已经加载过的loader不会再次进行加载（可用于横竖屏幕切换时）
     protected void initListLoader(int id) {
         mListLoaderIds.add(id);
         LoaderManager loaderManager = LoaderManager.getInstance(this);
@@ -198,6 +202,7 @@ public abstract class RecyclerViewFragment<T extends RecyclerCursorAdapter> exte
         LoaderManager.getInstance(this).restartLoader(id, null, this);
     }
 
+    // 每次都重新加载数据，不论id是否相同
     public void restartListLoader() {
         if (!isAdded()) {
             iLog.w(TAG, this + " restartListLoader() failed | !isAdded");

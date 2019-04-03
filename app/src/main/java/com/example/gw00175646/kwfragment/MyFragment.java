@@ -20,9 +20,11 @@ public class MyFragment extends RecyclerViewFragment<MyAdapter> {
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         setUpdateThrottle(0);
+        // 启动loader，异步加载数据到界面
         initListLoader(1);
     }
 
+    // 使用Builder构造adapter
     @Override
     protected MyAdapter onCreateAdapter() {
         return new MyAdapter.Builder(this).setText1Col(ListUtils.TestColumn.TEXT1).setText2Col
@@ -30,23 +32,27 @@ public class MyFragment extends RecyclerViewFragment<MyAdapter> {
                 .setThumbnailCol(ListUtils.TestColumn.THUMBNAIL).build();
     }
 
+    // 配置布局管理器
     @Override
     protected RecyclerView.LayoutManager onCreateLayoutManager() {
         return new LinearLayoutManager(getContext());
     }
 
+    // 配置数据库查询条件，可以开启多个loader，配置多组数据，分开管理
     @Override
-    protected QueryArgs onCreateQueryArgs(int id) {
+    protected QueryArgs onCreateQueryArgs(int loaderId) {
         return null;
     }
 
     @NonNull
     @Override
     public Loader<Cursor> onCreateLoader(int id, @Nullable Bundle bundle) {
+        // 没有写db，暂用测试数据代替
         return new AsyncTaskLoader<Cursor>(getContext()) {
             @Nullable
             @Override
             public Cursor loadInBackground() {
+                // 加载耗时数据
                 try {
                     Thread.sleep(2000);
                 } catch (InterruptedException e) {

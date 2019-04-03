@@ -14,6 +14,7 @@ public class MyAdapter extends RecyclerCursorAdapter<MyAdapter.ViewHolder> {
         super(builder);
     }
 
+    // 设置item布局，可以根据viewType区别设置多种布局
     @Override
     protected ViewHolder onCreateViewHolder(ViewGroup parent, int viewType, @Nullable View
             itemView) {
@@ -29,6 +30,7 @@ public class MyAdapter extends RecyclerCursorAdapter<MyAdapter.ViewHolder> {
         }
     }
 
+    // adapter构造器，设置数据库数据和控件绑定
     public static class Builder extends AbsBuilder<Builder> {
 
         public Builder(Fragment fragment) {
